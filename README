@@ -1,0 +1,62 @@
+== Knock Knock Admin by Luciano Laporta Podazza (luciano (At) hack-it * com * ar) ==
+
+A simple "port knocking" style security layer for website administration panels.
+This software works in two steps:
+
+1st. Set up your passphrase and directory to protect
+2nd. Include the kka.php script in the very top of your index.php to activate it.
+3rd. Do the knock knock and get into your restricted area :)
+
+== Detail ==
+   
+If an attacker tries to find your admin directory and he does, KKA 
+will throw a 404 error like if it isn't there (avoiding automated attack tools and 
+manual checking).
+
+For example:
+
+"http://www.site.com/admin" contains your admin panel. Its normal behaviour is
+to show your administration panel, allowing an attacker to perform checks like
+brute-force, wordlists, SQL injection, etc.
+
+Using KKA allows you to set up a passphrase like "chuck norris style" (no matter
+ the lenght and characters distribution) and to use as follows:
+
+1st knock: http://www.site.com/admin/?chuck
+It's the 1st success but it throws a 404 error.
+
+2nd knock: http://www.site.com/admin/?norris
+2nd success but it throws a 404 error.
+
+3rd knock: http://www.site.com/admin/?style
+3rd (and last) success but it throws a 404 error.
+
+Now you can go to  http://www.site.com/admin/ and the admin panel will appear! :)
+
+== Notes ==
+I've choosed php for this tool instead of mod_rewrite or things like that
+ because of php popularity and availability against the rest of the technologies.
+Also this is intended for people who host their websites in a hosting limited access environment.
+
+This is just another security layer to use in your systems, this doesn't represent
+a bullet proof system nor any guarantees of not being hacked. Remember that there's
+a *lot* of attack vectors that makes this tool useless so please avoid flaming me ;)
+
+== Known vulnerabilities ==
+1. If KKA is in your /admin/ path and you have, for instance, /admin/images/ (wich throws
+ any kind of response) an attacker may guess that /admin/ exists. 
+It depends on the server policies but it gives an idea to the attacker that if 
+/images/ exists, then /admin/ exists too. Anyhow it would be hard to guess/brute-force
+the passphrase to get in. I've to work on this later.
+
+2. If an attacker sniffs your LAN he can analyze the traffic and see that you're accesing 
+to URL's like "/admin/?whatever". Showing the passphrase to him.
+
+3. If the attacker have access to your browsing history, he can know what the passphrase is too.
+
+4. If you choose to use Sessions or Cookies in KKA instead of a txt file, the script will return the id to the user even if there's a 404 error. This issue reveals that something's happening "behind scenes" so it won't be stealth.
+
+== TODO ==
+1. Currently KKA allows access from one IP address. I will work to deattach the session for multiples IP.
+2. Deny access to sub-directories.
+3. Close the actual session. Currently the only way to close the session is that your IP or passphrase changes (this regenerates the txt file)
