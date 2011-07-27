@@ -60,4 +60,4 @@ to URL's like "/admin/?whatever". Showing the passphrase to him.
 1. Currently KKA allows access from one IP address. I will work to deattach the session for multiples IP.
 2. Deny access to sub-directories.
 3. Close the actual session. Currently the only way to close the session is that your IP or passphrase changes (this regenerates the txt file)
-4. Ba IP's if the attacker tries to bruteforce the passphrase
+4. Ban IP's if the attacker tries to bruteforce the passphrase
