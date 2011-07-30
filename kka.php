@@ -12,7 +12,7 @@ Please note that passphrase IS case sensitive! (PASSWORD is not equal than passw
 */
 //Configuration
 $denied_path		 			  = "/access/"; //Path to protect.
-$passphrase			 			  = "memento mori";  //Your passphrase.
+$passphrase			 			  = "memento mori loco";  //Your passphrase.
 $filename_hash					  = sha1( $passphrase.sha1( $_SERVER['REMOTE_ADDR'] ) )."-kka";
 $passphrase 		 			  = ltrim( $passphrase ); //Trim space at the begining of the string
 $passphrase 		 			  = rtrim( $passphrase ); //Trim space at the end of the string
@@ -20,7 +20,7 @@ $passphrase 					  = explode(" ", $passphrase ); //We create an array of passwor
 $possible_tries			      	  = count( $passphrase ); //Getting the max quantity of tries.
 $banning 						  = 10; //Maximum amount of tries before getting attacker's IP address banned.
 $log							  = 1;//Do we log attempts? 1 or 0.
-$log_file						  = date('d-m-Y-') . $_SERVER['REMOTE_ADDR'] . ".txt";
+$log_file						  = date('d-m-Y-') . $filename_hash . ".txt";
 if($log == 1){
 	//let's log!, Request, IP, timestamp and user-agent by now...
 	$data  = "Request:"		. $_SERVER['REQUEST_URI'] 			. "\n";
