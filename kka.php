@@ -19,7 +19,6 @@ $passphrase 		 			  = ltrim( $passphrase ); //Trim space at the begining of the 
 $passphrase 		 			  = rtrim( $passphrase ); //Trim space at the end of the string
 $passphrase 					  = explode(" ", $passphrase ); //We create an array of passwords
 $possible_tries			      	  = count( $passphrase ); //Getting the max quantity of tries.
-$banning 						  = 10; //Maximum amount of tries before getting attacker's IP address banned.
 $log							  = 1;//Do we log attempts? 1 or 0.
 $log_file						  = "log-" . date('d-m-Y-') . $filename_hash . ".log";
 if($log == 1){
