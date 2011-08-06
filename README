@@ -33,6 +33,8 @@ It's the 1st success but it throws a 404 error.
 
 Now you can go to  http://www.site.com/admin/ and the admin panel will appear! :)
 
+To close your session you just have to configure the magic word to close it and follow the same workflow as above.
+
 == Notes ==
 I've choosed php for this tool instead of mod_rewrite or things like that
  because of php popularity and availability against the rest of the technologies.
@@ -57,7 +59,5 @@ to URL's like "/admin/?whatever". Showing the passphrase to him.
 4. If you choose to use Sessions or Cookies in KKA instead of a txt file, the script will return the id to the user even if there's a 404 error. This issue reveals that something's happening "behind scenes" so it won't be stealth.
 
 == TODO ==
-1. Currently KKA allows access from one IP address. I will work to deattach the session for multiples IP.
-2. Deny access to sub-directories.
-3. Close the actual session. Currently the only way to close the session is that your IP or passphrase changes (this regenerates the txt file)
-4. Ban IP's if the attacker tries to bruteforce the passphrase
+1. Deny access to sub-directories.
+2. Implement multiple passphrases to support multiple users.
