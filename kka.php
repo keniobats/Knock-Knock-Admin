@@ -1,4 +1,7 @@
 <?php
+ini_set("log_errors" , "1");
+ini_set("error_log" , "Errors.log.txt");
+ini_set("display_errors" , "0");
 /*
 Knock Knock Admin by Luciano Laporta Podazza (luciano (At) hack-it * com * ar)
 
@@ -13,22 +16,29 @@ Please note that passphrase IS case sensitive! (PASSWORD is not equal than passw
 //Configuration
 $denied_path		 			  = "/access/"; //Path to protect.
 $passphrase			 			  = "memento mori loco";  //Your passphrase.
-$filename_hash					  = sha1( $passphrase.sha1( $_SERVER['REMOTE_ADDR'] ) )."-kka";
+$close_session					  = "kaput";
+$filename_hash					  = sha1( $passphrase.sha1( $HostInfo_IP ) )."-kka";
 $passphrase 		 			  = ltrim( $passphrase ); //Trim space at the begining of the string
 $passphrase 		 			  = rtrim( $passphrase ); //Trim space at the end of the string
 $passphrase 					  = explode(" ", $passphrase ); //We create an array of passwords
 $possible_tries			      	  = count( $passphrase ); //Getting the max quantity of tries.
 $banning 						  = 10; //Maximum amount of tries before getting attacker's IP address banned.
 $log							  = 1;//Do we log attempts? 1 or 0.
-$log_file						  = date('d-m-Y-') . $filename_hash . ".txt";
+$log_file						  = "log-" . date('d-m-Y-') . $filename_hash . ".log";
 if($log == 1){
 	//let's log!, Request, IP, timestamp and user-agent by now...
-	$data  = "Request:"		. $_SERVER['REQUEST_URI'] 			. "\n";
-	$data .= "Proxy?:"		. $_SERVER['HTTP_X_FORWARDED_FOR'] 	. "\n";
-	$data .= "IP:" 			. $_SERVER['REMOTE_ADDR'] 			. "\n";
-	$data .= "Timestamp:" 			. date('d-m-Y G:i:s') 			. "\n";
-	$data .= "User-Agent:"	. $_SERVER['HTTP_USER_AGENT'] 		. "\n\n";
-	file_put_contents($log_file, $data, FILE_APPEND);
+	$HostInfo_Request 	= "Request:"	. $_SERVER['REQUEST_URI'] 			. "\n";
+	$HostInfo_Proxy 	= "Proxy?:"		. $_SERVER['HTTP_X_FORWARDED_FOR'] 	. "\n";
+	$HostInfo_IP 		= "IP:" 		. $_SERVER['REMOTE_ADDR'] 			. "\n";
+	$HostInfo_TimeStamp = "Timestamp:" 	. date('d-m-Y G:i:s') 				. "\n";
+	$HostInfo_UserAgent = "User-Agent:"	. $_SERVER['HTTP_USER_AGENT'] 		. "\n\n";
+	file_put_contents(
+		$log_file, 
+		$HostInfo_Request . 
+		$HostInfo_Proxy . 
+		$HostInfo_IP . 
+		$HostInfo_TimeStamp . 
+		$HostInfo_UserAgent, FILE_APPEND);
 }
 //We get the knock (i.e. /path/?pass we get the "pass" string.)
 $knock = explode("?", $_SERVER['REQUEST_URI'], 2);
@@ -71,7 +81,12 @@ if( !file_exists($filename_hash) ) {
 	file_put_contents( $filename_hash, "0");	
 }
 $succeed_try = file_get_contents( $filename_hash ); //Counter to match with $possible_tries
-//Let's Knock N' Roll! :) 
+//Let's Knock N' Roll! :)
+if( $knock[1] == $close_session ) {
+		unlink( $filename_hash );
+		header('HTTP/1.1 404 Not Found');
+		exit();
+	}
 if( $succeed_try != $possible_tries ) {
 	if( $knock[1] == $passphrase[$succeed_try] ) {
 		$succeed_try = $succeed_try + 1;
