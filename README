@@ -35,6 +35,13 @@ Now you can go to  http://www.site.com/admin/ and the admin panel will appear! :
 
 To close your session you just have to configure the magic word to close it and follow the same workflow as above.
 
+== Installation ==
+You can use KKA in ANY of your web apps just including it at the very first line after the opening php tags of your index.php file like this:
+<?php
+include("kka.php");
+....(the rest of your aplication code goes here)....
+?>
+
 == Notes ==
 I've choosed php for this tool instead of mod_rewrite or things like that
  because of php popularity and availability against the rest of the technologies.
