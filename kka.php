@@ -11,16 +11,16 @@ Examples:
 Please note that passphrase IS case sensitive! (PASSWORD is not equal to password)
 */
 //Configuration
-$denied_path		 			  = "/access/"; //Path to protect.
-$passphrase			 			  = "memento mori loco";  //Your passphrase.
-$close_session					  = "kaput";
-$filename_hash					  = sha1( $passphrase.sha1( $_SERVER['REMOTE_ADDR'] ) )."-kka";
-$passphrase 		 			  = ltrim( $passphrase ); //Trim space at the begining of the string
-$passphrase 		 			  = rtrim( $passphrase ); //Trim space at the end of the string
-$passphrase 					  = explode(" ", $passphrase ); //We create an array of passwords
-$possible_tries			      	  = count( $passphrase ); //Getting the max quantity of tries.
-$log							  = 1;//Do we log attempts? 1 or 0.
-$log_file						  = "log-" . date('d-m-Y-') . $filename_hash . ".log";
+$denied_path	 = "/access/"; //Path to protect.
+$passphrase	 = "abra kadabra";  //Your passphrase.
+$close_session	 = "close it"; //the word to close your session.
+$filename_hash	 = sha1( $passphrase.sha1( $_SERVER['REMOTE_ADDR'] ) )."-kka";
+$passphrase 	 = ltrim( $passphrase ); //Trim space at the begining of the string
+$passphrase	 = rtrim( $passphrase ); //Trim space at the end of the string
+$passphrase 	 = explode(" ", $passphrase ); //We create an array of passwords
+$possible_tries	 = count( $passphrase ); //Getting the max quantity of tries.
+$log		 = 0;//Do we log attempts? 1 or 0.
+$log_file	 = "log-" . date('d-m-Y-') . $filename_hash . ".log"; //change it with the name you want
 if($log == 1){
 	//let's log!, Request, IP, timestamp and user-agent by now...
 	$HostInfo_Request 	= "Request:"	. $_SERVER['REQUEST_URI'] 			. "\n";
@@ -39,7 +39,7 @@ if($log == 1){
 //We get the knock (i.e. /path/?pass we get the "pass" string.)
 $knock = explode("?", $_SERVER['REQUEST_URI'], 2);
 /* 
-Checking session, if it doesn't exists then we check that /path/ 	
+Checking session, if it doesn't exists then we check that /path/
 hasn't any passphrase or "?" without vars and return 404.
 */
 if( file_exists( $filename_hash ) ) {
@@ -57,7 +57,7 @@ if( file_exists( $filename_hash ) ) {
 //End checking
 //If it's a new file, initialize it.
 if( !file_exists($filename_hash) ) {
-	file_put_contents( $filename_hash, "0");	
+	file_put_contents( $filename_hash, "0");
 }
 $succeed_try = file_get_contents( $filename_hash ); //Counter to match with $possible_tries
 //Let's Knock N' Roll! :)
