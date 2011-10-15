@@ -23,11 +23,11 @@ $log_file		= 'log-'.date('d-m-Y-').$filename_hash.'.log';
 
 if($log) {
 	//let's log!, Request, IP, timestamp and user-agent by now...
-	$HostInfo	 = 'Request:'	. $_SERVER['REQUEST_URI']			. "\n";
-	$HostInfo	.= 'Proxy?:'		. $_SERVER['HTTP_X_FORWARDED_FOR']	. "\n";
-	$HostInfo	.= 'IP:'			. $_SERVER['REMOTE_ADDR']			. "\n";
-	$HostInfo	.= 'Timestamp:'	. date('d-m-Y G:i:s')				. "\n";
-	$HostInfo	.= 'User-Agent:'	. $_SERVER['HTTP_USER_AGENT']		. "\n\n";
+	$HostInfo	 = 'Request: '		. (isset($_SERVER['REQUEST_URI'])?$_SERVER['REQUEST_URI']:'Undefined')."\n";
+	$HostInfo	.= 'Proxy?: '		. (isset($_SERVER['HTTP_X_FORWARDED_FOR'])?$_SERVER['HTTP_X_FORWARDED_FOR']:'Probably not')."\n";
+	$HostInfo	.= 'IP Address: '	. (isset($_SERVER['REMOTE_ADDR'])?$_SERVER['REMOTE_ADDR']:'Undefined')."\n";
+	$HostInfo	.= 'Timestamp: '	. date('d-m-Y G:i:s')."\n";
+	$HostInfo	.= 'User-Agent:'	. (isset($_SERVER['HTTP_USER_AGENT'])?$_SERVER['HTTP_USER_AGENT']:'Undefined')."\n\n";
 	file_put_contents($log_file, $HostInfo, FILE_APPEND);
 }
 
