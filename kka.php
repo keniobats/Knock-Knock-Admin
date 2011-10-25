@@ -14,12 +14,11 @@ Please note that passphrase IS case sensitive! (PASSWORD is not equal to passwor
 //Configuration
 $passphrase		= 'abra kadabra';				//Your passphrase.
 $close_session	= 'close it';					//the word to close your session.
-$filename_hash	= sha1($passphrase.sha1($_SERVER['REMOTE_ADDR'])).'-kka';
-$passphrase		= trim($passphrase);			//Trim starting/ending whitespace
-$passphrase		= explode(' ', $passphrase);	//We create an array of passwords
-$possible_tries	= count($passphrase );			//Getting the max quantity of tries.
+$filename_hash	= hash('sha256', $passphrase . hash('sha256', $_SERVER['REMOTE_ADDR'])).'-kka';
+$passphrase		= explode(' ', trim($passphrase));			//Trim starting/ending whitespace and create an array of passwords
+$possible_tries	= count($passphrase);			//Getting the max quantity of tries.
 $log			= false;						//Do we log attempts? 1 or 0.
-$log_file		= 'log-'.date('d-m-Y-').$filename_hash.'.log';
+$log_file		= 'log-' . date('d-m-Y-') . $filename_hash . '.log';
 
 if($log) {
 	//let's log!, Request, IP, timestamp and user-agent by now...
@@ -33,10 +32,9 @@ if($log) {
 
 //We get the knock (i.e. /path/?pass we get the "pass" string.)
 if(isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
-	$knock = $_SERVER['QUERY_STRING'];
+	$knock = urldecode($_SERVER['QUERY_STRING']);
 } elseif(isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI']) && strpos('?',$_SERVER['REQUEST_URI']) !== false) {
-	$knock = explode('?', $_SERVER['REQUEST_URI'], 2);
-	$knock = end($knock);
+	$knock = urldecode(end(explode('?', $_SERVER['REQUEST_URI'], 2)));
 } else {
 	$knock = '';
 }
@@ -52,11 +50,8 @@ if(file_exists( $filename_hash)) {
 		exit();
 		}
 	}
-}
-
-//End checking
-//If it's a new file, initialize it.
-if(!file_exists($filename_hash)) {
+}else{
+	//If it's a new file, initialize it.
 	file_put_contents($filename_hash, '0');
 }
 
