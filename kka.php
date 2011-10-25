@@ -15,13 +15,14 @@ Please note that passphrase IS case sensitive! (PASSWORD is not equal to passwor
 $passphrase		= 'abra kadabra';				//Your passphrase.
 $close_session	= 'close it';					//the word to close your session.
 $filename_hash	= hash('sha256', $passphrase . hash('sha256', $_SERVER['REMOTE_ADDR'])).'-kka';
-$passphrase		= explode(' ', trim($passphrase));			//Trim starting/ending whitespace and create an array of passwords
-$possible_tries	= count($passphrase);			//Getting the max quantity of tries.
+
 $log			= false;						//Do we log attempts? 1 or 0.
 $log_file		= 'log-' . date('d-m-Y-') . $filename_hash . '.log';
+// Stop editing here!!
 
+// Is log activated?
 if($log) {
-	//let's log!, Request, IP, timestamp and user-agent by now...
+	// let's log!, Request, IP, timestamp and user-agent by now...
 	$HostInfo	 = 'Request: '		. (isset($_SERVER['REQUEST_URI'])?$_SERVER['REQUEST_URI']:'Undefined')."\n";
 	$HostInfo	.= 'Proxy?: '		. (isset($_SERVER['HTTP_X_FORWARDED_FOR'])?$_SERVER['HTTP_X_FORWARDED_FOR']:'Probably not')."\n";
 	$HostInfo	.= 'IP Address: '	. (isset($_SERVER['REMOTE_ADDR'])?$_SERVER['REMOTE_ADDR']:'Undefined')."\n";
@@ -39,41 +40,33 @@ if(isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
 	$knock = '';
 }
 
-/*
-Checking session, if it doesn't exists then we check that /path/
-hasn't any passphrase or "?" without vars and return 404.
-*/
-if(file_exists( $filename_hash)) {
-	if(file_get_contents($filename_hash) != $possible_tries) {
-		if(empty($knock)) {
-		header('HTTP/1.1 404 Not Found');
-		exit();
-		}
-	}
-}else{
-	//If it's a new file, initialize it.
-	file_put_contents($filename_hash, '0');
-}
 
-$succeed_try = file_get_contents($filename_hash); //Counter to match with $possible_tries
-
-//Let's Knock N' Roll! :)
+//Close the session
 if($knock == $close_session) {
 		unlink($filename_hash);
 		header('HTTP/1.1 404 Not Found');
 		exit();
 }
 
-if($succeed_try != $possible_tries) {
-	if($knock == $passphrase[$succeed_try]) {
-		$succeed_try = $succeed_try + 1;
-		file_put_contents($filename_hash, $succeed_try);
-		header('HTTP/1.1 404 Not Found');
-		exit();
+// Not the first try?
+if(file_exists( $filename_hash)) {
+	$succeed_try = file_get_contents($filename_hash); //Counter to match with $possible_tries
+}else{
+	$succeed_try = 0;
+}
+
+//Still not in?
+if($succeed_try != count($passphrase)) {
+	//Trim starting/ending whitespace and create an array of passwords
+	$passphrase	= explode(' ', trim($passphrase));
+	
+	if($knock == $passphrase[$succeed_try]) {	
+		// Correct
+		file_put_contents($filename_hash, $succeed_try +1);
 	} else {
-		$succeed_try = 0;
-		file_put_contents($filename_hash, $succeed_try);
-		header('HTTP/1.1 404 Not Found');
-		exit();
+		// Start again
+		file_put_contents($filename_hash, 0);
 	}
+	header('HTTP/1.1 404 Not Found');
+	exit();
 }
