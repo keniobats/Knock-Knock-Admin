@@ -34,10 +34,10 @@ define('KKA_LOG_EMAIL_ADDRESS',	'example@example.com');
 
 
 // We get the knock (i.e. /path/?pass we get the "pass" string.)
-if ( isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING']) ) {
+if (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
 	$knock = urldecode($_SERVER['QUERY_STRING']);
     log_knock('ALL');
-} elseif ( isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI']) && strpos('?',$_SERVER['REQUEST_URI']) !== false ) {
+} elseif (isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI']) && strpos('?',$_SERVER['REQUEST_URI']) !== false) {
 	$knock = urldecode(end(explode('?', $_SERVER['REQUEST_URI'], 2)));
     log_knock('ALL');
 } else {
@@ -47,7 +47,9 @@ if ( isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING']) ) {
 
 // Close the session
 if ($knock == KKA_CLOSE_SESSION) {
-    unlink(KKA_FILE_NAME);
+    if (file_exists(KKA_FILE_NAME)) {
+        unlink(KKA_FILE_NAME);
+    }
     header('HTTP/1.1 404 Not Found');
     exit();
 }
