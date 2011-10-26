@@ -34,10 +34,10 @@ define('KKA_LOG_EMAIL_ADDRESS',	'example@example.com');
 
 
 // We get the knock (i.e. /path/?pass we get the "pass" string.)
-if(isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
+if ( isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING']) ) {
 	$knock = urldecode($_SERVER['QUERY_STRING']);
     log_knock('ALL');
-} elseif(isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI']) && strpos('?',$_SERVER['REQUEST_URI']) !== false) {
+} elseif ( isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI']) && strpos('?',$_SERVER['REQUEST_URI']) !== false ) {
 	$knock = urldecode(end(explode('?', $_SERVER['REQUEST_URI'], 2)));
     log_knock('ALL');
 } else {
@@ -46,16 +46,16 @@ if(isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
 
 
 // Close the session
-if($knock == KKA_CLOSE_SESSION) {
-		unlink(KKA_FILE_NAME);
-		header('HTTP/1.1 404 Not Found');
-		exit();
+if ($knock == KKA_CLOSE_SESSION) {
+    unlink(KKA_FILE_NAME);
+    header('HTTP/1.1 404 Not Found');
+    exit();
 }
 
 // Not the first try?
-if(file_exists(KKA_FILE_NAME)) {
-	$succeed_try = file_get_contents(KKA_FILE_NAME); //Counter to match with $possible_tries
-}else{
+if (file_exists(KKA_FILE_NAME)) {
+	$succeed_try = file_get_contents(KKA_FILE_NAME); // Counter to match with $possible_tries
+} else {
 	$succeed_try = 0;
 }
 
@@ -63,9 +63,9 @@ if(file_exists(KKA_FILE_NAME)) {
 $passphrase	= explode(' ', trim(KKA_PASSPHRASE));
 	
 // Still not in?
-if($succeed_try != count($passphrase)) {
+if ($succeed_try != count($passphrase)) {
 
-	if($knock == $passphrase[$succeed_try]) {	
+	if ($knock == $passphrase[$succeed_try]) {	
 		// Correct
         log_knock('SUCCESSFULL');
 		file_put_contents(KKA_FILE_NAME, $succeed_try +1);
@@ -89,11 +89,11 @@ function log_knock($level){
 	$HostInfo	.= 'IP Address: '	. (isset($_SERVER['REMOTE_ADDR']) 				? $_SERVER['REMOTE_ADDR'] 				: 'Undefined')		."\n";
 	$HostInfo	.= 'User-Agent:'	. (isset($_SERVER['HTTP_USER_AGENT']) 			? $_SERVER['HTTP_USER_AGENT'] 			: 'Undefined')		."\n\n";
 	
-	if(KKA_LOG_FILE_LEVEL == $level) {
+	if (KKA_LOG_FILE_LEVEL == $level) {
 		log_to_file($HostInfo);
 	}
 	
-	if(KKA_LOG_EMAIL_LEVEL == $level){
+	if (KKA_LOG_EMAIL_LEVEL == $level) {
 		log_to_email($HostInfo);
 	}
 }
