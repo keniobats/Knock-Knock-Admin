@@ -1,83 +1,129 @@
 <?php
 /*
-Knock Knock Admin by Luciano Laporta Podazza (luciano (At) hack-it * com * ar)
+	Knock Knock Admin by Luciano Laporta Podazza (luciano (At) hack-it * com * ar)
+*/
 
-Configure your passphrase, remember that the white space is the separator.
-Examples:
-"an example" -- 2 words, 2 tries to succeed.
-"follow the white rabbit" -- 4 words, 4 tries to succeed.
-"this example contains numbers 123456" -- 5 words, 5 tries to succeed.
-"password1,password2,password3" -- 1 word(there's no white space separator), 1 try to succeed.
-Please note that passphrase IS case sensitive! (PASSWORD is not equal to password)
-*/
 //Configuration
-$denied_path	 = "/access/"; //Path to protect.
-$passphrase	 = "abra kadabra";  //Your passphrase.
-$close_session	 = "close it"; //the word to close your session.
-$filename_hash	 = sha1( $passphrase.sha1( $_SERVER['REMOTE_ADDR'] ) )."-kka";
-$passphrase 	 = ltrim( $passphrase ); //Trim space at the begining of the string
-$passphrase	 = rtrim( $passphrase ); //Trim space at the end of the string
-$passphrase 	 = explode(" ", $passphrase ); //We create an array of passwords
-$possible_tries	 = count( $passphrase ); //Getting the max quantity of tries.
-$log		 = 0;//Do we log attempts? 1 or 0.
-$log_file	 = "log-" . date('d-m-Y-') . $filename_hash . ".log"; //change it with the name you want
-if($log == 1){
-	//let's log!, Request, IP, timestamp and user-agent by now...
-	$HostInfo_Request 	= "Request:"	. $_SERVER['REQUEST_URI'] 			. "\n";
-	$HostInfo_Proxy 	= "Proxy?:"		. $_SERVER['HTTP_X_FORWARDED_FOR'] 	. "\n";
-	$HostInfo_IP 		= "IP:" 		. $_SERVER['REMOTE_ADDR'] 			. "\n";
-	$HostInfo_TimeStamp = "Timestamp:" 	. date('d-m-Y G:i:s') 				. "\n";
-	$HostInfo_UserAgent = "User-Agent:"	. $_SERVER['HTTP_USER_AGENT'] 		. "\n\n";
-	file_put_contents(
-		$log_file, 
-		$HostInfo_Request . 
-		$HostInfo_Proxy . 
-		$HostInfo_IP . 
-		$HostInfo_TimeStamp . 
-		$HostInfo_UserAgent, FILE_APPEND);
+
+//	Configure your passphrase, remember that the white space is the separator.
+//	Examples:
+//	"an example" -- 2 words, 2 tries to succeed.
+//	"follow the white rabbit" -- 4 words, 4 tries to succeed.
+//	"this example contains numbers 123456" -- 5 words, 5 tries to succeed.
+//	"password1,password2,password3" -- 1 word(there's no white space separator), 1 try to succeed.
+//	Please note that passphrase IS case sensitive! (PASSWORD is not equal to password)
+define('KKA_PASSPHRASE', 'abra kadabra');
+
+// The word to close your session. It's goes in only one request
+define('KKA_CLOSE_SESSION', 'close it');
+
+// The file used to save sessions. Don't touch this without being sure of what are you doing!
+define('KKA_FILE_NAME', hash('sha256', KKA_PASSPHRASE . hash('sha256', $_SERVER['REMOTE_ADDR'])).'-kka');
+
+//  Configure the loging options.
+//	The level can be:
+//	- ALL: Log every request
+//	- SUCCESSFULL: Log only successfull attempts
+//	- NONE: Log nothing
+//	This is aplicable to both email and file loging
+define('KKA_LOG_FILE_LEVEL',	'ALL');
+define('KKA_LOG_FILE_NAME',		'log-' . date('d-m-Y-') . KKA_FILE_NAME . '.log');
+define('KKA_LOG_EMAIL_LEVEL',	'NONE');
+define('KKA_LOG_EMAIL_ADDRESS',	'example@example.com'); 
+// Stop editing here!!
+
+
+/**
+ * Write log to a file
+ *
+ * @param string $what is the log text
+ */
+function log_to_file($what){
+	file_put_contents(KKA_LOG_FILE_NAME, $what, FILE_APPEND);
 }
-//We get the knock (i.e. /path/?pass we get the "pass" string.)
-$knock = explode("?", $_SERVER['REQUEST_URI'], 2);
-/* 
-Checking session, if it doesn't exists then we check that /path/
-hasn't any passphrase or "?" without vars and return 404.
-*/
-if( file_exists( $filename_hash ) ) {
-	if( file_get_contents( $filename_hash ) != $possible_tries) {
-		if( $_SERVER['REQUEST_URI'] == $denied_path ) {
-		header('HTTP/1.1 404 Not Found');
-		exit();
-		}
-		elseif ( !$knock[1] ) {
-		header('HTTP/1.1 404 Not Found');
-		exit();
+
+/**
+ * Write log to a file
+ *
+ * @param string $what is the log text
+ */
+function log_to_email($what){
+	mail(KKA_LOG_EMAIL_ADDRESS, 'Knock Knock Admin log', $what);
+}
+
+/**
+ * Return timestamp, request, IP and user agent for loging
+ *
+ * @param string $level can be 'ALL' or 'SUCCESS'. It indicates where is the function being called from. Read the configuration documentation.
+ */
+function log_knock($level) {
+	$HostInfo	 = 'Timestamp: '	. date('d-m-Y G:i:s')."\n";
+	$HostInfo	.= 'Request: '		. (isset($_SERVER['REQUEST_URI']) 				? $_SERVER['REQUEST_URI'] 				: 'Undefined')		."\n";
+	$HostInfo	.= 'Proxy?: '		. (isset($_SERVER['HTTP_X_FORWARDED_FOR']) 		? $_SERVER['HTTP_X_FORWARDED_FOR']		: 'Probably not')	."\n";
+	$HostInfo	.= 'IP Address: '	. (isset($_SERVER['REMOTE_ADDR']) 				? $_SERVER['REMOTE_ADDR'] 				: 'Undefined')		."\n";
+	$HostInfo	.= 'User-Agent:'	. (isset($_SERVER['HTTP_USER_AGENT']) 			? $_SERVER['HTTP_USER_AGENT'] 			: 'Undefined')		."\n\n";
+	
+	if (KKA_LOG_FILE_LEVEL == $level) {
+		log_to_file($HostInfo);
+	}
+	
+	if (KKA_LOG_EMAIL_LEVEL == $level) {
+		log_to_email($HostInfo);
 	}
 }
+
+/**
+ * Show a fake 404 page and die
+ */
+function fake_404() {
+    header('HTTP/1.1 404 Not Found');
+    exit();
 }
-//End checking
-//If it's a new file, initialize it.
-if( !file_exists($filename_hash) ) {
-	file_put_contents( $filename_hash, "0");
+
+// We get the knock (i.e. /path/?pass we get the "pass" string.)
+if (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) {
+	$knock = urldecode($_SERVER['QUERY_STRING']);
+    log_knock('ALL');
+} elseif (isset($_SERVER['REQUEST_URI']) && !empty($_SERVER['REQUEST_URI']) && strpos('?',$_SERVER['REQUEST_URI']) !== false) {
+	$knock = urldecode(end(explode('?', $_SERVER['REQUEST_URI'], 2)));
+    log_knock('ALL');
+} else {
+	$knock = '';
 }
-$succeed_try = file_get_contents( $filename_hash ); //Counter to match with $possible_tries
-//Let's Knock N' Roll! :)
-if( $knock[1] == $close_session ) {
-		unlink( $filename_hash );
-		header('HTTP/1.1 404 Not Found');
-		exit();
-	}
-if( $succeed_try != $possible_tries ) {
-	if( $knock[1] == $passphrase[$succeed_try] ) {
-		$succeed_try = $succeed_try + 1;
-		file_put_contents( $filename_hash, $succeed_try );
-		header('HTTP/1.1 404 Not Found');
-		exit();
-	}
-	else{
-		$succeed_try = 0;
-		file_put_contents( $filename_hash, $succeed_try );
-		header('HTTP/1.1 404 Not Found');
-		exit();
-	}
+
+
+// Close the session
+if ($knock == KKA_CLOSE_SESSION) {
+    if (file_exists(KKA_FILE_NAME)) {
+        unlink(KKA_FILE_NAME);
+    }
+    fake_404();
 }
-?>
+
+// Not the first try?
+if (file_exists(KKA_FILE_NAME)) {
+    // How many succefull knocks were made?
+	$succeed_try = file_get_contents(KKA_FILE_NAME); 
+} else {
+	$succeed_try = 0;
+}
+
+// Trim starting/ending whitespace and create an array of passwords
+$passphrase	= explode(' ', trim(KKA_PASSPHRASE));
+	
+// Still not in?
+if ($succeed_try != count($passphrase)) {
+
+	if ($knock == $passphrase[$succeed_try]) {	
+		// Correct
+        log_knock('SUCCESSFULL');
+		file_put_contents(KKA_FILE_NAME, $succeed_try +1);
+	} else {
+		// Start again
+		file_put_contents(KKA_FILE_NAME, 0);
+	}
+    fake_404();
+}
+
+// Cleanup
+unset($knock, $succeed_try, $passphrase);
