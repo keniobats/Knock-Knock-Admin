@@ -1,9 +1,9 @@
 == Knock Knock Admin by Luciano Laporta Podazza (luciano (At) hack-it * com * ar) ==
 
 A simple "port knocking" style security layer for website administration panels.
-This software works in two steps:
+This software works in three steps:
 
-1st. Set up your passphrase and directory to protect
+1st. Set up your passphrase in kka.php
 2nd. Include the kka.php script in the very top of your index.php to activate it.
 3rd. Do the knock knock and get into your restricted area :)
 
@@ -68,3 +68,7 @@ to URL's like "/admin/?whatever". Showing the passphrase to him.
 == TODO ==
 1. Deny access to sub-directories.
 2. Implement multiple passphrases to support multiple users.
+
+== DONATION ==
+Please, if KKA was useful to you, consider donating to the project. You can do it in the following link: 
+https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QR683AJ67W58N
